@@ -2,7 +2,7 @@ import { currentUser } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 
 export const checkUser = async () => {
-  const user = await currentUser();
+const user = await currentUser();
 console.log(user)
   // Check for current logged in clerk user
   if (!user) {

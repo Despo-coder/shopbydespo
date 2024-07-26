@@ -13,7 +13,7 @@ const data = await db.order.aggregate({
 }
     
 )
-await wait(2000)
+//await wait(2000)
 return {amount: (data._sum.pricePaidInCents || 0)/100, numberOfSales: data._count}
  }
 

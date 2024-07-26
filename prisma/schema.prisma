@@ -33,6 +33,7 @@ model User {
   clerkId    String
   imageUrl  String
   name      String?
+  admin     Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   orders    Order[]
