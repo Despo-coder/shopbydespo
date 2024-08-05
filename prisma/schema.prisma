@@ -17,14 +17,56 @@ model Product {
   id                     String                 @id @default(uuid())
   name                   String
   priceInCents           Int
-  filePath               String
+  type                   String
+  filePath               String?
   imagePath              String
   description            String
+  stockQuantity          Int?
   isAvailableForPurchase Boolean                @default(true)
   createdAt              DateTime               @default(now())
   updatedAt              DateTime               @updatedAt
   orders                 Order[]
   downloadVerifications  DownloadVerification[]
+  images                 ProductImage[]         // Relation to multiple images
+  sizes     Size[]
+  colors    Color[]
+  categories Category[]
+  isFeatured Boolean @default(false)
+  wishlistItems WishlistItem[]
+
+  @@index([name]) // Index on name for search
+  @@index([priceInCents]) // Index on price for sorting/filtering
+  @@index([isAvailableForPurchase]) // Index on availability for filtering
+}
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  imagePath String
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId]) // Index on productId for quick lookups
+}
+
+model Size {
+  id        String    @id @default(uuid())
+  name      String    // e.g., "SM", "M", "L", "XL"
+  products  Product[]
+}
+
+model Color {
+  id        String    @id @default(uuid())
+  name      String
+  products  Product[]
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  parentId  String?
+  parent    Category? @relation("SubCategories", fields: [parentId], references: [id])
+  children  Category[] @relation("SubCategories")
+  products  Product[]
 }
 
 model User {
@@ -37,7 +79,20 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   orders    Order[]
+   wishlistItems WishlistItem[]
 }
+
+model WishlistItem {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
 
 model Order {
   id               String   @id @default(uuid())
@@ -48,6 +103,8 @@ model Order {
   productId String
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([userId, productId]) // Composite index for frequent queries by user and product
 }
 
 model DownloadVerification {

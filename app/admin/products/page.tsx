@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button"
 import PageHeader from "../_components/PageHeader"
 import Link from "next/link"
@@ -32,10 +33,9 @@ export default function AdminProductsPage() {
       <div className="flex justify-between items-center">
       <PageHeader>Products</PageHeader>
       <Link  href="/admin/products/create"> 
-    <Button>
+       <Button>
         Add Product
        </Button>
-      
        </Link>
       </div>
         
@@ -51,6 +51,7 @@ async function ProductsTable() {
       name: true,
       priceInCents: true,
       isAvailableForPurchase: true,
+      type: true,
       _count: { select: { orders: true } },
     },
     orderBy: { name: "asc" },
@@ -100,9 +101,18 @@ async function ProductsTable() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem asChild>
-                    <a download href={`/admin/products/${product.id}/download`}>
+                    {product.type === 'digital' ? (
+                      <a download href={`/admin/products/${product.id}/download`}>
+                        Download
+                      </a>
+                    ) : (
+                      <Link href={`/admin/products/${product.id}/download`} className="hidden">
+                        Edit
+                      </Link>
+                    )}
+                    {/* <a download href={`/admin/products/${product.id}/download`}>
                       Download
-                    </a>
+                    </a> */}
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href={`/admin/products/${product.id}/edit`}>

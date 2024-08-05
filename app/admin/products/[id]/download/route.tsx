@@ -9,10 +9,17 @@ export async function GET(
 ) {
   const product = await db.product.findUnique({
     where: { id },
-    select: { filePath: true, name: true },
+    select: { filePath: true, name: true, type: true },
   })
 
   if (product == null) return notFound()
+
+  if (product.type === 'physical'|| !product.filePath) {
+    return new NextResponse(JSON.stringify({ message: "Downloads are only available for digital products" }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
 
   const { size } = await fs.stat(product.filePath)
   const file = await fs.readFile(product.filePath)
