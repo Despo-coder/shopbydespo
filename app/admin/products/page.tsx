@@ -1,4 +1,5 @@
-
+import { currentUser } from "@clerk/nextjs/server"
+import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button"
 import PageHeader from "../_components/PageHeader"
 import Link from "next/link"
@@ -25,9 +26,22 @@ import {
     ActiveToggleDropdownItem,
     DeleteDropdownItem,
   } from "./_components/ProductActions"
+ 
 
+export default async function AdminProductsPage() {
+  const user = await currentUser()
+  const dbUser = await db.user.findUnique({
+where: {
+      clerkId: user?.id,
+    },
+  });
 
-export default function AdminProductsPage() {
+  if(dbUser?.clerkId ===  user?.id && dbUser?.admin !== true){
+    redirect("/");
+
+  }
+  // console.log('DB User',dbUser)
+  // console.log('Clerk User',user)
   return (
     <>
       <div className="flex justify-between items-center">
@@ -101,7 +115,7 @@ async function ProductsTable() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem asChild>
-                    {product.type === 'digital' ? (
+                    {product.type === 'DIGITAL' ? (
                       <a download href={`/admin/products/${product.id}/download`}>
                         Download
                       </a>

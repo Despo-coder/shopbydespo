@@ -4,6 +4,8 @@ import "./globals.css";
 import { Variable } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {Toaster} from 'react-hot-toast';
+import { ClerkProvider } from '@clerk/nextjs'
+
 
 const inter = Inter({ subsets: ["latin"] , variable: "--font-sans"}, );
 
@@ -20,7 +22,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={cn('bg-background min-h-screen font-sans antialiased', inter.variable)}>
-        {children}
+        <ClerkProvider>
+          
+          {children}
+        </ClerkProvider>
+        
         <Toaster />
         </body>
     </html>

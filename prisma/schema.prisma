@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -17,26 +11,27 @@ model Product {
   id                     String                 @id @default(uuid())
   name                   String
   priceInCents           Int
-  type                   String
-  filePath               String?
-  imagePath              String
+  type                   ProductType            // Use enum for product type
+  filePath               String?                // For digital products, path to file
+  imagePath              String?
   description            String
-  stockQuantity          Int?
+  stockQuantity          Int?                   // Only for physical products
   isAvailableForPurchase Boolean                @default(true)
   createdAt              DateTime               @default(now())
   updatedAt              DateTime               @updatedAt
   orders                 Order[]
   downloadVerifications  DownloadVerification[]
   images                 ProductImage[]         // Relation to multiple images
-  sizes     Size[]
-  colors    Color[]
-  categories Category[]
-  isFeatured Boolean @default(false)
-  wishlistItems WishlistItem[]
+  sizes                  Size[]                 @relation("ProductSizes")  // Only for physical products
+  colors                 Color[]                @relation("ProductColors") // Only for physical products
+  categories             Category[]             @relation("ProductCategories") // Can be used for both
+  subCategories          SubCategory[]          @relation("ProductSubCategories") // New relation to subcategories
+  isFeatured             Boolean                @default(false)
+  wishlistItems          WishlistItem[]
 
-  @@index([name]) // Index on name for search
-  @@index([priceInCents]) // Index on price for sorting/filtering
-  @@index([isAvailableForPurchase]) // Index on availability for filtering
+  @@index([name])
+  @@index([priceInCents])
+  @@index([isAvailableForPurchase])
 }
 
 model ProductImage {
@@ -45,19 +40,19 @@ model ProductImage {
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  @@index([productId]) // Index on productId for quick lookups
+  @@index([productId])
 }
 
 model Size {
   id        String    @id @default(uuid())
   name      String    // e.g., "SM", "M", "L", "XL"
-  products  Product[]
+  products  Product[] @relation("ProductSizes")
 }
 
 model Color {
   id        String    @id @default(uuid())
   name      String
-  products  Product[]
+  products  Product[] @relation("ProductColors")
 }
 
 model Category {
@@ -66,20 +61,31 @@ model Category {
   parentId  String?
   parent    Category? @relation("SubCategories", fields: [parentId], references: [id])
   children  Category[] @relation("SubCategories")
-  products  Product[]
+  products  Product[] @relation("ProductCategories")
+  subCategories SubCategory[] @relation("CategorySubCategories") // New relation to subcategories
+}
+
+model SubCategory { // New model for subcategories
+  id        String    @id @default(uuid())
+  name      String
+  categoryId String
+  category  Category  @relation("CategorySubCategories", fields: [categoryId], references: [id], onDelete: Cascade)
+  products  Product[] @relation("ProductSubCategories")
+
+  @@index([categoryId])
 }
 
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
-  clerkId    String
+  clerkId   String   @unique
   imageUrl  String
   name      String?
   admin     Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   orders    Order[]
-   wishlistItems WishlistItem[]
+  wishlistItems WishlistItem[]
 }
 
 model WishlistItem {
@@ -93,18 +99,17 @@ model WishlistItem {
   @@unique([userId, productId])
 }
 
-
 model Order {
   id               String   @id @default(uuid())
   pricePaidInCents Int
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
-  userId    String
-  productId String
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  userId           String
+  productId        String
+  user             User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product          Product @relation(fields: [productId], references: [id], onDelete: Restrict)
 
-  @@index([userId, productId]) // Composite index for frequent queries by user and product
+  @@index([userId, productId])
 }
 
 model DownloadVerification {
@@ -113,4 +118,10 @@ model DownloadVerification {
   createdAt DateTime @default(now())
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// Enum to differentiate between product types
+enum ProductType {
+  PHYSICAL
+  DIGITAL
 }

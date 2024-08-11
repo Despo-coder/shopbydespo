@@ -9,11 +9,15 @@ export default async function EditProductPage({
 }) {
   const product = await db.product.findUnique({
     where: { id },
-    include: { images: true }
+    include: { 
+      images: true,
+      sizes: true,
+      colors: true,
+      categories: true
+    }
   });
   
 
-  console.log("Edit Product", product)
   return (
     <>
       <PageHeader>Edit Product</PageHeader>

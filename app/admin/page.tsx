@@ -8,6 +8,8 @@ import {
 import { db } from "@/lib/db";
 import { formatCurrency, formatNumber } from "@/lib/formatters";
 import { wait } from "@/assets/utility/slowFunc";
+import { currentUser } from "@clerk/nextjs/server"
+import { redirect } from "next/navigation";
 
 
 
@@ -80,6 +82,19 @@ export default async function AdminHomePage() {
     getCustomersData(),
     getProductsData(),
   ]);
+
+  const user = await currentUser()
+  const dbUser = await db.user.findUnique({
+where: {
+      clerkId: user?.id,
+    },
+  });
+
+  if(dbUser?.clerkId ===  user?.id && dbUser?.admin !== true){
+    redirect("/");
+
+  }
+
 
   return (
     <>

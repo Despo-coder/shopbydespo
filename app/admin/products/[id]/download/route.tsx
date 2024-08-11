@@ -14,7 +14,7 @@ export async function GET(
 
   if (product == null) return notFound()
 
-  if (product.type === 'physical'|| !product.filePath) {
+  if (product.type === 'PHYSICAL'|| !product.filePath) {
     return new NextResponse(JSON.stringify({ message: "Downloads are only available for digital products" }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' }

@@ -3,23 +3,23 @@ import { db } from '@/lib/db';
 
 export const checkUser = async () => {
 const user = await currentUser();
-console.log(user)
+//console.log(user)
   // Check for current logged in clerk user
   if (!user) {
     return null;
   }
 
-  // Check if the user is already in the database
-  // const loggedInUser = await db.user.findUnique({
-  //   where: {
-  //     user: user.id,
-  //   },
-  // });
+ // Check if the user is already in the database
+  const loggedInUser = await db.user.findUnique({
+    where: {
+      clerkId: user.id,
+    },
+  });
 //console.log(loggedInUser)
-  // If user is in database, return user
-  // if (loggedInUser) {
-  //   return loggedInUser;
-  // }
+ // If user is in database, return user
+  if (loggedInUser) {
+    return loggedInUser;
+  }
 
   // If not in database, create new user
   const newUser = await db.user.create({
